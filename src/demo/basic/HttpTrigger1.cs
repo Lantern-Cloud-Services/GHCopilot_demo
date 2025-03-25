@@ -8,22 +8,35 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-
-
 namespace Company.Function
 {
     public static class HttpTrigger1
     {
         [FunctionName("HttpTrigger1")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
             ILogger log)
         {
+            log.LogInformation("Processing a new order.");
 
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            Order order = JsonConvert.DeserializeObject<Order>(requestBody);
 
-            return new OkObjectResult($"Hello, {name}. This HTTP triggered function executed successfully. Product ID: {productID}, Quantity: {quantity}, Order ID: {orderID}");
+            if (order == null || string.IsNullOrEmpty(order.OrderId) || string.IsNullOrEmpty(order.ProductId) || order.Quantity <= 0)
+            {
+                return new BadRequestObjectResult("Invalid order payload.");
+            }
 
+            await OrderPersistence.SaveOrderAsync(order);
+
+            return new OkObjectResult(new { message = "Order saved successfully.", order });
         }
+    }
+
+    public class Order
+    {
+        public string OrderId { get; set; }
+        public string ProductId { get; set; }
+        public int Quantity { get; set; }
     }
 }
