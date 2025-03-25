@@ -17,14 +17,12 @@ namespace Company.Function
     /// </summary>
     public static class HttpTrigger1
     {
-        // CosmosDB configuration
-        private static readonly string CosmosDbConnectionString = Environment.GetEnvironmentVariable("CosmosDbConnectionString");
-        private static readonly string DatabaseName = Environment.GetEnvironmentVariable("DatabaseName") ?? "OrdersDb";
-        private static readonly string ContainerName = Environment.GetEnvironmentVariable("ContainerName") ?? "Orders";
-
         /// <summary>
-        /// Processes an incoming order request
+        /// Azure Function to handle HTTP requests for processing orders.
         /// </summary>
+        /// <param name="req">The HTTP request containing the order payload.</param>
+        /// <param name="log">Logger instance for logging information.</param>
+        /// <returns>Returns an IActionResult indicating success or failure.</returns>
         [FunctionName("HttpTrigger1")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
@@ -35,80 +33,53 @@ namespace Company.Function
             try
             {
                 string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-                
+
                 if (req.Method == "POST")
                 {
                     // Parse the order from the request body
                     var order = JsonConvert.DeserializeObject<Order>(requestBody);
-                    
-                    if (order == null)
+
+                    if (order == null || string.IsNullOrEmpty(order.ProductId) || order.Quantity <= 0)
                     {
-                        return new BadRequestObjectResult("Invalid order payload");
+                        return new BadRequestObjectResult("Invalid order payload.");
                     }
-                    
-                    if (string.IsNullOrEmpty(order.ProductId))
+
+                    // Persist the order to Cosmos DB
+                    await OrderPersistence.SaveOrderAsync(order.OrderId, order.ProductId, order.Quantity);
+
+                    return new OkObjectResult(new
                     {
-                        return new BadRequestObjectResult("ProductId is required");
-                    }
-                    
-                    if (order.Quantity <= 0)
-                    {
-                        return new BadRequestObjectResult("Quantity must be greater than zero");
-                    }
-                    
-                    // Create order repository
-                    var orderRepository = CreateOrderRepository(log);
-                    
-                    // Persist the order to CosmosDB
-                    var createdOrder = await orderRepository.CreateOrderAsync(order);
-                    
-                    return new OkObjectResult(new 
-                    { 
-                        message = "Order created successfully", 
-                        order = createdOrder 
+                        message = "Order created successfully",
+                        orderId = order.OrderId
                     });
                 }
                 else if (req.Method == "GET")
                 {
                     // Retrieve order by ID
                     string orderId = req.Query["orderId"];
-                    
+
                     if (string.IsNullOrEmpty(orderId))
                     {
-                        return new BadRequestObjectResult("Please provide an orderId parameter");
+                        return new BadRequestObjectResult("Please provide an orderId parameter.");
                     }
-                    
-                    var orderRepository = CreateOrderRepository(log);
-                    var order = await orderRepository.GetOrderAsync(orderId);
-                    
+
+                    var order = await OrderPersistence.GetOrderAsync(orderId);
+
                     if (order == null)
                     {
-                        return new NotFoundObjectResult($"Order with ID {orderId} not found");
+                        return new NotFoundObjectResult($"Order with ID {orderId} not found.");
                     }
-                    
+
                     return new OkObjectResult(order);
                 }
-                
-                return new BadRequestObjectResult("Invalid HTTP method");
+
+                return new BadRequestObjectResult("Invalid HTTP method.");
             }
             catch (Exception ex)
             {
                 log.LogError($"Error processing request: {ex.Message}");
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
-        }
-        
-        /// <summary>
-        /// Creates an instance of the order repository
-        /// </summary>
-        private static IOrderRepository CreateOrderRepository(ILogger log)
-        {
-            if (string.IsNullOrEmpty(CosmosDbConnectionString))
-            {
-                throw new InvalidOperationException("CosmosDbConnectionString environment variable is not set");
-            }
-            
-            return new CosmosOrderRepository(CosmosDbConnectionString, DatabaseName, ContainerName, log);
         }
     }
 }
