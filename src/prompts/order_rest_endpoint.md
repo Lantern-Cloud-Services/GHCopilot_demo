@@ -1,0 +1,1 @@
+Create an order processor rest endpoint that takes in a payload containing an orderId, productId and quantity.  Parse the payload into an order object.  Implement the order object in its own class.  Persist the order object to a cosmos db, implement the persistence logic in its own file.  Write uniti tests and document all code.
