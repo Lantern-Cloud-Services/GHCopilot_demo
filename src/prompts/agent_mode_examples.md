@@ -1,4 +1,4 @@
-# Generated with the prompt - creat a new .md file in the prompts directory containing example prompts that showcase the power of agent mode
+# Generated with the prompt - create a new .md file in the prompts directory containing example prompts that showcase the power of agent mode
 
 
 # Example Prompts for Agent Mode
