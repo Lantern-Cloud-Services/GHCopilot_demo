@@ -28,9 +28,9 @@ The workshop provides the audiences with an overview of the GitHub Copilot servi
 - ### [Visual Studio with GitHub Copilot Demo](./src/demo/visualstudio/VisualStudioDemo.md) - Visual Studio Blazor Weather App.
 - ### [Advanced VSC Agent Mode Copilot Demo](./src/demo/prompts/agent_mode_examples.md) - End to end feature implementation using Agent Mode
 - ### [GitHub Copilot Infra Demo](./src/demo/infra/) - Out of the box use cases - IaC, policy, scripting, etc
-- ### [GitHub Copilot CLI Demo](./src/demo/cli/Copilot_CLI_Demo.md) - path
-- ### [GitHub Copilot MCP Demo](./src/demo/MCP/mcp_webapp.md) - Coming Soon
-- ### [GitHub Copilot PMO Demo](./src/demo/prompts/pmo.md)- Coming Soon
+- ### [GitHub Copilot CLI Demo](./src/demo/cli/Copilot_CLI_Demo.md) - Copilot for the CLI
+- ### [GitHub Copilot MCP Demo](./src/demo/MCP/mcp_webapp.md) - Uses MCP Server to create an end to end webapp
+- ### [GitHub Copilot PMO Demo](./src/demo/prompts/pmo.md)- Using Copilot for PMO Operations
 
 
 
