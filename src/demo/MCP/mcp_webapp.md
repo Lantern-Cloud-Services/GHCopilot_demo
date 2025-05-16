@@ -1,0 +1,1 @@
+Help me build an Azure application using Node.js, make the application deployable via docker, write unit tests and document all code. Build the application in the MCP directory.  Run CLI commands without prompting me for confirmation.
