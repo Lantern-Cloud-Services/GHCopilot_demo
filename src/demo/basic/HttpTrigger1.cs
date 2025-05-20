@@ -22,7 +22,7 @@ namespace Company.Function
 
             log.LogInformation("C# HTTP trigger function processed a request.");
 
-            return new OkObjectResult($"Hello, {name}. This HTTP triggered function executed successfully. Product ID: {productID}, Quantity: {quantity}, Order ID: {orderID}");
+            return new OkObjectResult($"Hello. This HTTP triggered function executed successfully.");
 
         }
     }
